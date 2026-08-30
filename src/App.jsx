@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
+import { Draggable } from "gsap/Draggable";
 
 import "./App.css";
 import video from "./assets/video/bday.mp4";
 
+gsap.registerPlugin(Draggable);
 
 /* =========================================
    IMPORT ALL PHOTOS AUTOMATICALLY
@@ -348,6 +350,100 @@ function App() {
 
 
   }, [showGallery]);
+
+/* =========================================
+   DRAG PHOTOS
+========================================= */
+
+useEffect(() => {
+
+  if (!showGallery) return;
+
+  if (!galleryRef.current) return;
+
+
+  const cards =
+    galleryRef.current.querySelectorAll(".photo-card");
+
+
+  const draggables = [];
+
+
+  cards.forEach((card) => {
+
+    const draggable = Draggable.create(card, {
+
+      type: "x,y",
+
+      bounds: ".gallery",
+
+      inertia: false,
+
+
+      onPress() {
+
+        /* Bring dragged image to front */
+
+        gsap.to(this.target, {
+
+          zIndex: 500,
+
+          duration: 0.2,
+
+        });
+
+      },
+
+
+      onDragStart() {
+
+        gsap.to(this.target, {
+
+          scale: "+=0.08",
+
+          duration: 0.2,
+
+          ease: "power2.out",
+
+        });
+
+      },
+
+
+      onDragEnd() {
+
+        gsap.to(this.target, {
+
+          scale: "-=0.08",
+
+          duration: 0.3,
+
+          ease: "power2.out",
+
+        });
+
+      },
+
+    });
+
+
+    draggables.push(...draggable);
+
+  });
+
+
+  return () => {
+
+    draggables.forEach((draggable) => {
+
+      draggable.kill();
+
+    });
+
+  };
+
+
+}, [showGallery]);
 
 
   /* =========================================

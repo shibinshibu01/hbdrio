@@ -330,3 +330,19 @@
   }
 
 }
+
+/* =========================================
+   DRAGGABLE PHOTOS
+========================================= */
+
+.photo-card {
+  touch-action: none;
+}
+
+.photo-card:active {
+  cursor: grabbing;
+}
+
+.photo-card.dragging {
+  cursor: grabbing;
+}
