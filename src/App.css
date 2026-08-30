@@ -1,101 +1,163 @@
 /* =========================================
-   MAIN APP
+   ROOT
 ========================================= */
 
 .app {
+  position: relative;
   width: 100vw;
   height: 100vh;
 
-  position: relative;
-
   overflow: hidden;
-
   background: #000;
+
+  perspective: 1500px;
 }
 
 
 /* =========================================
-   VIDEO
+   VIDEO - FULLSCREEN
 ========================================= */
 
 .birthday-video {
   position: absolute;
-
-  top: 0;
-  left: 0;
-
-  width: 100%;
-  height: 100%;
-
-  object-fit: contain;
-
-  z-index: 1;
-
-  display: block;
-}
-
-
-/* =========================================
-   PHOTO OVERLAY
-========================================= */
-
-.photos-overlay {
-  position: absolute;
-
   inset: 0;
 
   width: 100%;
   height: 100%;
 
-  overflow: hidden;
+  object-fit: cover;
+  object-position: center;
+
+  z-index: 1;
+}
+
+
+/* =========================================
+   GALLERY
+========================================= */
+
+.gallery {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  z-index: 10;
 
   pointer-events: none;
+
+  perspective: 1500px;
+}
+
+
+/* =========================================
+   PHOTO CARD
+========================================= */
+
+.photo-card {
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+
+  width: 280px;
+  height: 360px;
+
+  pointer-events: auto;
+  cursor: pointer;
+
+  transform: translate(-50%, -50%);
+
+  transform-origin: center;
+
+  transform-style: preserve-3d;
+
+  will-change:
+    transform,
+    opacity,
+    filter;
 
   z-index: 10;
 }
 
 
 /* =========================================
-   PHOTO WRAPPER
+   IMAGE - CLEAN / BORDERLESS
 ========================================= */
 
-.memory-wrapper {
-  position: absolute;
+.photo-card img {
+  width: 100%;
+  height: 100%;
 
-  top: 50%;
-  left: 50%;
+  display: block;
 
-  transform: translate(-50%, -50%);
+  object-fit: cover;
 
-  transform-origin: center;
+  border-radius: 12px;
 
-  will-change: transform, opacity;
+  user-select: none;
+
+  -webkit-user-drag: none;
+
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.5);
+
+  transition:
+    box-shadow 0.3s ease;
 }
 
 
 /* =========================================
-   PHOTO
+   HOVER
 ========================================= */
 
-.memory {
-  width: clamp(85px, 11vw, 180px);
+.photo-card:hover img {
+  box-shadow:
+    0 35px 90px rgba(0, 0, 0, 0.75);
+}
 
-  height: clamp(110px, 15vw, 240px);
 
-  object-fit: cover;
+/* =========================================
+   ACTIVE PHOTO
+========================================= */
 
-  display: block;
+.photo-card.active {
+  position: fixed;
 
-  background: white;
+  top: 50%;
+  left: 50%;
 
-  padding: 5px;
+  width: min(80vw, 850px);
+  height: min(78vh, 750px);
 
-  border-radius: 3px;
+  transform:
+    translate(-50%, -50%) !important;
 
-  user-select: none;
+  z-index: 1000 !important;
+
+  opacity: 1 !important;
+
+  filter: none !important;
+}
+
+
+.photo-card.active img {
+  border-radius: 18px;
 
   box-shadow:
-    0 15px 35px rgba(0, 0, 0, 0.55);
+    0 50px 150px rgba(0, 0, 0, 0.85);
+}
+
+
+/* =========================================
+   INACTIVE PHOTOS
+========================================= */
+
+.photo-card.inactive {
+  opacity: 0.15 !important;
+
+  filter: blur(6px);
 }
 
 
@@ -105,49 +167,43 @@
 
 .start-screen {
   position: absolute;
-
   inset: 0;
 
   z-index: 100;
 
   display: flex;
-
   justify-content: center;
   align-items: center;
 
-  /*
-    IMPORTANT:
-    Transparent enough to see video behind it
-  */
+  background:
+    rgba(0, 0, 0, 0.5);
 
-  background: rgba(0, 0, 0, 0.25);
-
-  backdrop-filter: blur(2px);
+  backdrop-filter:
+    blur(8px);
 }
 
 
 .start-content {
   display: flex;
-
   flex-direction: column;
 
   align-items: center;
 
-  gap: 25px;
+  gap: 20px;
 }
 
 
-.start-small {
-  color: white;
+.start-content p {
+  color:
+    rgba(255, 255, 255, 0.7);
 
-  font-family: Arial, sans-serif;
+  font-family:
+    Arial,
+    sans-serif;
 
-  font-size: 11px;
+  font-size: 10px;
 
-  letter-spacing: 4px;
-
-  text-shadow:
-    0 2px 10px black;
+  letter-spacing: 5px;
 }
 
 
@@ -155,68 +211,60 @@
    START BUTTON
 ========================================= */
 
-.start-button {
+.start-content button {
   display: flex;
-
   align-items: center;
 
-  gap: 12px;
+  gap: 10px;
 
-  padding: 18px 34px;
+  padding:
+    18px 36px;
 
-  border-radius: 100px;
+  border-radius:
+    100px;
 
   border:
-    1px solid rgba(255, 255, 255, 0.6);
+    1px solid rgba(255, 255, 255, 0.35);
 
   background:
-    rgba(0, 0, 0, 0.35);
+    rgba(255, 255, 255, 0.1);
 
   color: white;
 
-  font-family: Arial, sans-serif;
-
-  font-size: 13px;
+  font-size: 12px;
 
   letter-spacing: 3px;
 
   cursor: pointer;
 
-  transition: all 0.3s ease;
+  transition:
+    all 0.3s ease;
 
-  backdrop-filter: blur(10px);
+  backdrop-filter:
+    blur(10px);
 }
 
 
-.start-button:hover {
-  transform: scale(1.08);
+.start-content button:hover {
+  transform:
+    scale(1.08);
 
   background:
-    rgba(255, 255, 255, 0.2);
-}
-
-
-.start-button:active {
-  transform: scale(0.96);
-}
-
-
-.play-icon {
-  font-size: 12px;
+    rgba(255, 255, 255, 0.18);
 }
 
 
 /* =========================================
-   RESTART BUTTON
+   RESTART
 ========================================= */
 
 .restart-button {
   position: absolute;
 
-  bottom: 20px;
   right: 20px;
+  bottom: 20px;
 
-  z-index: 200;
+  z-index: 2000;
 
   width: 42px;
   height: 42px;
@@ -224,10 +272,10 @@
   border-radius: 50%;
 
   border:
-    1px solid rgba(255, 255, 255, 0.4);
+    1px solid rgba(255, 255, 255, 0.25);
 
   background:
-    rgba(0, 0, 0, 0.5);
+    rgba(0, 0, 0, 0.35);
 
   color: white;
 
@@ -235,16 +283,18 @@
 
   cursor: pointer;
 
-  opacity: 0.7;
+  opacity: 0.5;
 
-  transition: all 0.3s ease;
+  transition:
+    all 0.3s ease;
 }
 
 
 .restart-button:hover {
   opacity: 1;
 
-  transform: rotate(180deg);
+  transform:
+    rotate(180deg);
 }
 
 
@@ -254,12 +304,29 @@
 
 @media (max-width: 768px) {
 
-  .memory {
-    width: clamp(65px, 22vw, 120px);
+  .photo-card {
+    width: 135px;
+    height: 180px;
+  }
 
-    height: clamp(90px, 30vw, 170px);
 
-    padding: 4px;
+  .photo-card img {
+    border-radius: 10px;
+  }
+
+
+  .photo-card.active {
+    width: 88vw;
+    height: 72vh;
+  }
+
+
+  .restart-button {
+    width: 36px;
+    height: 36px;
+
+    right: 14px;
+    bottom: 14px;
   }
 
 }
