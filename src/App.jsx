@@ -1,646 +1,512 @@
-import { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { Draggable } from "gsap/Draggable";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import "./App.css";
+
 import video from "./assets/video/bday.mp4";
 
-gsap.registerPlugin(Draggable);
+import PhotoCard from "./components/PhotoCard";
 
-/* =========================================
-   IMPORT ALL PHOTOS AUTOMATICALLY
-========================================= */
+
+/* ========================================
+   LOAD PHOTO URLS
+======================================== */
 
 const photoModules = import.meta.glob(
-  "./assets/photos/*.{jpg,jpeg,png,JPG,JPEG,PNG}",
+  "./assets/photos-optimized/*.webp",
   {
     eager: true,
+    query: "?url",
     import: "default",
   }
 );
 
+
 const photos = Object.entries(photoModules)
-  .sort(([a], [b]) =>
-    a.localeCompare(b, undefined, {
-      numeric: true,
-      sensitivity: "base",
-    })
-  )
-  .map(([, image]) => image);
+  .sort(([a], [b]) => {
+
+    return a.localeCompare(
+      b,
+      undefined,
+      {
+        numeric: true,
+        sensitivity: "base",
+      }
+    );
+
+  })
+  .map(([, src]) => src);
 
 
-/* =========================================
-   CENTERED GALLERY POSITIONS
-
-   These are relative positions around
-   the CENTER of the screen.
-========================================= */
+/* ========================================
+   CENTER POSITIONS
+======================================== */
 
 const positions = [
-  { x: -0.9, y: -1.0, rotation: -10, scale: 0.85 },
-  { x: 0, y: -1.25, rotation: 3, scale: 1 },
-  { x: 0.9, y: -1.0, rotation: 10, scale: 0.85 },
 
-  { x: -1.15, y: 0, rotation: -7, scale: 1 },
-  { x: 1.15, y: 0, rotation: 7, scale: 1 },
+  {
+    x: -0.9,
+    y: -1,
+    rotation: -10,
+    scale: 0.9,
+  },
 
-  { x: -0.9, y: 1.0, rotation: 8, scale: 0.85 },
-  { x: 0, y: 1.25, rotation: -3, scale: 1 },
-  { x: 0.9, y: 1.0, rotation: -8, scale: 0.85 },
+  {
+    x: 0,
+    y: -1.2,
+    rotation: 2,
+    scale: 1,
+  },
+
+  {
+    x: 0.9,
+    y: -1,
+    rotation: 9,
+    scale: 0.9,
+  },
+
+  {
+    x: -1.15,
+    y: 0,
+    rotation: -7,
+    scale: 1,
+  },
+
+  {
+    x: 1.15,
+    y: 0,
+    rotation: 7,
+    scale: 1,
+  },
+
+  {
+    x: -0.9,
+    y: 1,
+    rotation: 8,
+    scale: 0.9,
+  },
+
+  {
+    x: 0,
+    y: 1.2,
+    rotation: -2,
+    scale: 1,
+  },
+
+  {
+    x: 0.9,
+    y: 1,
+    rotation: -8,
+    scale: 0.9,
+  },
+
 ];
+
+
+const MAX_VISIBLE = 8;
 
 
 function App() {
 
   const videoRef = useRef(null);
-  const galleryRef = useRef(null);
 
   const animationStarted = useRef(false);
-  const timelineRef = useRef(null);
 
-  const [isStarted, setIsStarted] = useState(false);
-  const [showGallery, setShowGallery] = useState(false);
-  const [activePhoto, setActivePhoto] = useState(null);
+  const nextPhotoIndex = useRef(0);
+
+
+  const [started, setStarted] =
+    useState(false);
+
+  const [showGallery, setShowGallery] =
+    useState(false);
+
+  const [visiblePhotos, setVisiblePhotos] =
+    useState([]);
+
+  const [expandedPhoto, setExpandedPhoto] =
+    useState(null);
+
   const [showBirthdayMessage, setShowBirthdayMessage] =
-  useState(false);
+    useState(false);
 
 
-  /* =========================================
-     VIDEO TIME
-  ========================================= */
+  /* ========================================
+     PRELOAD IMAGES
+
+     First 12 load while video plays.
+  ======================================== */
+
+  useEffect(() => {
+
+    const preloadCount = 12;
+
+    photos
+      .slice(0, preloadCount)
+      .forEach((src) => {
+
+        const image = new Image();
+
+        image.src = src;
+
+      });
+
+  }, []);
+
+
+
+  /* ========================================
+     PRELOAD UPCOMING PHOTOS
+  ======================================== */
+
+  const preloadNextPhotos = (
+    startIndex
+  ) => {
+
+    const preloadAmount = 4;
+
+
+    for (
+      let i = startIndex;
+      i < Math.min(
+        startIndex + preloadAmount,
+        photos.length
+      );
+      i++
+    ) {
+
+      const image = new Image();
+
+      image.src = photos[i];
+
+    }
+
+  };
+
+
+  /* ========================================
+     START GALLERY
+  ======================================== */
+
+  const startGallery = () => {
+
+    if (animationStarted.current) return;
+
+    animationStarted.current = true;
+
+    setShowGallery(true);
+
+
+    /* Initial 8 photos */
+
+    const initialPhotos =
+      photos
+        .slice(0, MAX_VISIBLE)
+        .map((src, index) => ({
+
+          id: index,
+
+          src,
+
+          slot: index,
+
+        }));
+
+
+    setVisiblePhotos(
+      initialPhotos
+    );
+
+
+    nextPhotoIndex.current =
+      MAX_VISIBLE;
+
+
+    preloadNextPhotos(
+      MAX_VISIBLE
+    );
+
+  };
+
+
+  /* ========================================
+     VIDEO TIME CHECK
+  ======================================== */
 
   const handleTimeUpdate = () => {
 
     if (!videoRef.current) return;
 
-    const currentTime = videoRef.current.currentTime;
 
     if (
-      currentTime >= 7 &&
+      videoRef.current.currentTime >= 7 &&
       !animationStarted.current
     ) {
 
-      animationStarted.current = true;
-      setShowGallery(true);
+      startGallery();
 
     }
 
   };
 
 
-  /* =========================================
-     PHOTO GALLERY ANIMATION
-  ========================================= */
+  /* ========================================
+     ROTATE PHOTOS
+
+     Replace oldest photo.
+  ======================================== */
 
   useEffect(() => {
 
     if (!showGallery) return;
-    if (!galleryRef.current) return;
 
 
-    const cards =
-      galleryRef.current.querySelectorAll(".photo-card");
+    const interval =
+      setInterval(() => {
 
+        if (
+          nextPhotoIndex.current >=
+          photos.length
+        ) {
 
-    if (!cards.length) return;
+          clearInterval(interval);
 
-
-    const ctx = gsap.context(() => {
-
-
-      /* =====================================
-         RESPONSIVE RADIUS
-
-         Controls how far photos move
-         away from the center.
-      ===================================== */
-
-      const isMobile =
-        window.innerWidth <= 768;
-
-
-      const radiusX =
-        isMobile ? 105 : 300;
-
-
-      const radiusY =
-        isMobile ? 145 : 240;
-
-
-      /* =====================================
-         INITIAL STATE
-      ===================================== */
-
-      gsap.set(cards, {
-
-        opacity: 0,
-
-        scale: 0.6,
-
-        x: 0,
-
-        y: 0,
-
-        rotation: 0,
-
-        filter: "blur(15px)",
-
-      });
-
-
-      /* =====================================
-         MASTER TIMELINE
-      ===================================== */
-
-      const masterTimeline =
-        gsap.timeline();
-
-
-      timelineRef.current =
-        masterTimeline;
-
-
-      /* =====================================
-         ANIMATE EACH PHOTO
-      ===================================== */
-
-      cards.forEach((card, index) => {
-
-
-        /* Get one of 8 positions */
-
-        const position =
-          positions[
-            index % positions.length
-          ];
-
-
-        /* Calculate position from center */
-
-        const targetX =
-          position.x * radiusX;
-
-
-        const targetY =
-          position.y * radiusY;
-
-
-        /* Entrance direction */
-
-        const direction =
-          index % 4;
-
-
-        let startX = 0;
-        let startY = 0;
-
-
-        if (direction === 0) {
-
-          startX = -window.innerWidth;
-
-        }
-
-        else if (direction === 1) {
-
-          startX = window.innerWidth;
-
-        }
-
-        else if (direction === 2) {
-
-          startY = -window.innerHeight;
-
-        }
-
-        else {
-
-          startY = window.innerHeight;
+          return;
 
         }
 
 
-        /* Set entrance position */
+        /* Mark oldest for removal */
 
-        gsap.set(card, {
+        setVisiblePhotos(
+          current => {
 
-          x: startX,
-
-          y: startY,
-
-          rotation:
-            position.rotation +
-            gsap.utils.random(-8, 8),
-
-        });
+            if (!current.length) {
+              return current;
+            }
 
 
-        /* =====================================
-           ENTER ANIMATION
-        ===================================== */
+            const updated =
+              current.map(
+                (photo, index) => {
 
-        masterTimeline.to(
+                  if (index === 0) {
 
-          card,
+                    return {
+                      ...photo,
+                      removing: true,
+                    };
 
-          {
+                  }
 
-            opacity: 1,
+                  return photo;
 
-            x: targetX,
+                }
+              );
 
-            y: targetY,
 
-            scale: position.scale,
+            return updated;
 
-            rotation:
-              position.rotation,
-
-            filter: "blur(0px)",
-
-            duration: 0.9,
-
-            ease: "power3.out",
-
-          },
-
-          index * 0.22
-
+          }
         );
 
-
-        /* =====================================
-           FLOATING MOVEMENT
-        ===================================== */
-
-        masterTimeline.to(
-
-          card,
-
-          {
-
-            x:
-              targetX +
-              gsap.utils.random(-12, 12),
-
-            y:
-              targetY +
-              gsap.utils.random(-12, 12),
-
-            rotation:
-              position.rotation +
-              gsap.utils.random(-3, 3),
-
-            duration: 1.5,
-
-            ease: "sine.inOut",
-
-          },
-
-          index * 0.22 + 0.9
-
-        );
-
-
-        /* =====================================
-           REMOVE OLD PHOTO
-
-           Keeps maximum 8 visible.
-        ===================================== */
-
-        if (index >= 8) {
-
-          const oldCard =
-            cards[index - 8];
-
-
-          masterTimeline.to(
-
-            oldCard,
-
-            {
-
-              opacity: 0,
-
-              scale: 0.75,
-
-              filter: "blur(10px)",
-
-              duration: 0.5,
-
-              ease: "power2.in",
-
-            },
-
-            index * 0.22
-
-          );
-
-        }
-
-      });
-
-
-    }, galleryRef);
+      }, 1100);
 
 
     return () => {
 
-      ctx.revert();
+      clearInterval(interval);
+
+    };
+
+  }, [showGallery]);
+
+
+  /* ========================================
+     REMOVE OLD PHOTO
+  ======================================== */
+
+  const removePhoto = (
+    id
+  ) => {
+
+    setVisiblePhotos(
+      current => {
+
+        const filtered =
+          current.filter(
+            photo =>
+              photo.id !== id
+          );
+
+
+        if (
+          nextPhotoIndex.current >=
+          photos.length
+        ) {
+
+          return filtered;
+
+        }
+
+
+        const newIndex =
+          nextPhotoIndex.current;
+
+
+        const newPhoto = {
+
+          id: newIndex,
+
+          src: photos[newIndex],
+
+          slot:
+            newIndex %
+            MAX_VISIBLE,
+
+        };
+
+
+        nextPhotoIndex.current += 1;
+
+
+        /* Preload next */
+
+        preloadNextPhotos(
+          nextPhotoIndex.current
+        );
+
+
+        return [
+          ...filtered,
+          newPhoto,
+        ];
+
+      }
+    );
+
+  };
+
+
+  /* ========================================
+     START EXPERIENCE
+  ======================================== */
+
+  const startExperience =
+    async () => {
+
+      if (!videoRef.current) return;
+
+      try {
+
+        await videoRef.current.play();
+
+        setStarted(true);
+
+      }
+
+      catch (error) {
+
+        console.error(
+          "Video playback failed:",
+          error
+        );
+
+      }
 
     };
 
 
-  }, [showGallery]);
-
-/* =========================================
-   DRAG PHOTOS
-========================================= */
-
-useEffect(() => {
-
-  if (!showGallery) return;
-
-  if (!galleryRef.current) return;
-
-
-  const cards =
-    galleryRef.current.querySelectorAll(".photo-card");
-
-
-  const draggables = [];
-
-
-  cards.forEach((card) => {
-
-    const draggable = Draggable.create(card, {
-
-      type: "x,y",
-
-      bounds: ".gallery",
-
-      inertia: false,
-
-
-      onPress() {
-
-        /* Bring dragged image to front */
-
-        gsap.to(this.target, {
-
-          zIndex: 500,
-
-          duration: 0.2,
-
-        });
-
-      },
-
-
-      onDragStart() {
-
-        gsap.to(this.target, {
-
-          scale: "+=0.08",
-
-          duration: 0.2,
-
-          ease: "power2.out",
-
-        });
-
-      },
-
-
-      onDragEnd() {
-
-        gsap.to(this.target, {
-
-          scale: "-=0.08",
-
-          duration: 0.3,
-
-          ease: "power2.out",
-
-        });
-
-      },
-
-    });
-
-
-    draggables.push(...draggable);
-
-  });
-
-
-  return () => {
-
-    draggables.forEach((draggable) => {
-
-      draggable.kill();
-
-    });
-
-  };
-
-
-}, [showGallery]);
-
-
-  /* =========================================
-     START EXPERIENCE
-  ========================================= */
-
-  const startExperience = async () => {
-
-    if (!videoRef.current) return;
-
-    try {
-
-      await videoRef.current.play();
-
-      setIsStarted(true);
-
-    }
-
-    catch (error) {
-
-      console.error(
-        "Video failed to play:",
-        error
-      );
-
-    }
-
-  };
-
-
-  /* =========================================
-     HOVER EFFECT
-  ========================================= */
-
-  const handleMouseMove = (event) => {
-
-    if (activePhoto !== null) return;
-
-
-    const card =
-      event.currentTarget;
-
-
-    const rect =
-      card.getBoundingClientRect();
-
-
-    const x =
-      event.clientX - rect.left;
-
-
-    const y =
-      event.clientY - rect.top;
-
-
-    const centerX =
-      rect.width / 2;
-
-
-    const centerY =
-      rect.height / 2;
-
-
-    const rotateY =
-      (x - centerX) / 18;
-
-
-    const rotateX =
-      -(y - centerY) / 18;
-
-
-    gsap.to(card, {
-
-      rotateX,
-
-      rotateY,
-
-      scale: "+=0.08",
-
-      duration: 0.3,
-
-      ease: "power2.out",
-
-      transformPerspective: 1000,
-
-    });
-
-  };
-
-
-  const handleMouseLeave = (event) => {
-
-    if (activePhoto !== null) return;
-
-
-    gsap.to(event.currentTarget, {
-
-      rotateX: 0,
-
-      rotateY: 0,
-
-      duration: 0.5,
-
-      ease: "power3.out",
-
-    });
-
-  };
-
-
-  /* =========================================
-     PHOTO CLICK
-  ========================================= */
-
-  const handlePhotoClick = (
-    event,
-    index
-  ) => {
-
-    event.stopPropagation();
-
-    setActivePhoto(index);
-
-  };
-
-
-  /* =========================================
-     CLOSE PHOTO
-  ========================================= */
-
-  const closePhoto = () => {
-
-    if (activePhoto !== null) {
-
-      setActivePhoto(null);
-
-    }
-
-  };
-
-
-  /* =========================================
-     RESTART
-  ========================================= */
-
-  const restartExperience = async (
-    event
-  ) => {
-
-    event.stopPropagation();
-
-    if (!videoRef.current) return;
-
-
-    if (timelineRef.current) {
-
-      timelineRef.current.kill();
-
-    }
-
-
-    animationStarted.current = false;
-
+  /* ========================================
+     VIDEO ENDED
+  ======================================== */
+
+  const handleVideoEnd = () => {
 
     setShowGallery(false);
 
-    setActivePhoto(null);
+    setExpandedPhoto(null);
 
 
-    videoRef.current.pause();
+    setTimeout(() => {
 
-    videoRef.current.currentTime = 0;
+      setShowBirthdayMessage(true);
 
-
-    await videoRef.current.play();
-
-
-    setIsStarted(true);
+    }, 400);
 
   };
 
 
-  /* =========================================
-     RENDER
-  ========================================= */
+  /* ========================================
+     EXPAND PHOTO
+  ======================================== */
+
+  const handleExpand = (
+    photo
+  ) => {
+
+    setExpandedPhoto(photo);
+
+  };
+
+
+  /* ========================================
+     CLOSE EXPANDED
+  ======================================== */
+
+  const closeExpanded = () => {
+
+    setExpandedPhoto(null);
+
+  };
+
+
+  /* ========================================
+     RESTART
+  ======================================== */
+
+  const restartExperience =
+    async (event) => {
+
+      event.stopPropagation();
+
+
+      if (!videoRef.current) return;
+
+
+      animationStarted.current = false;
+
+      nextPhotoIndex.current = 0;
+
+
+      setShowGallery(false);
+
+      setVisiblePhotos([]);
+
+      setExpandedPhoto(null);
+
+      setShowBirthdayMessage(false);
+
+
+      videoRef.current.currentTime = 0;
+
+
+      await videoRef.current.play();
+
+    };
+
 
   return (
 
-    <main
-      className="app"
-      onClick={closePhoto}
-    >
+    <main className="app">
 
 
-      {/* VIDEO */}
+      {/* =================================
+          VIDEO
+      ================================= */}
 
       <video
         ref={videoRef}
@@ -648,17 +514,7 @@ useEffect(() => {
         playsInline
         preload="auto"
         onTimeUpdate={handleTimeUpdate}
-        onEnded={() => {
-
-          setShowGallery(false);
-
-          setTimeout(() => {
-
-            setShowBirthdayMessage(true);
-
-          }, 500);
-
-        }}
+        onEnded={handleVideoEnd}
       >
 
         <source
@@ -670,61 +526,29 @@ useEffect(() => {
 
 
 
-      {/* PHOTO GALLERY */}
+      {/* =================================
+          PHOTO GALLERY
+      ================================= */}
 
       {showGallery && (
 
-        <div
-          ref={galleryRef}
-          className="gallery"
-        >
+        <div className="gallery">
 
-          {photos.map(
+          {visiblePhotos.map(
             (photo, index) => (
 
-              <div
-
-                key={index}
-
-                className={`
-                  photo-card
-                  ${
-                    activePhoto === index
-                      ? "active"
-                      : ""
-                  }
-                  ${
-                    activePhoto !== null &&
-                    activePhoto !== index
-                      ? "inactive"
-                      : ""
-                  }
-                `}
-
-                onClick={(event) =>
-                  handlePhotoClick(
-                    event,
-                    index
-                  )
+              <PhotoCard
+                key={photo.id}
+                photo={photo}
+                position={
+                  positions[
+                    photo.slot %
+                    positions.length
+                  ]
                 }
-
-                onMouseMove={
-                  handleMouseMove
-                }
-
-                onMouseLeave={
-                  handleMouseLeave
-                }
-
-              >
-
-                <img
-                  src={photo}
-                  alt={`Memory ${index + 1}`}
-                  draggable="false"
-                />
-
-              </div>
+                onRemove={removePhoto}
+                onExpand={handleExpand}
+              />
 
             )
           )}
@@ -733,11 +557,42 @@ useEffect(() => {
 
       )}
 
+
+
+      {/* =================================
+          EXPANDED PHOTO
+      ================================= */}
+
+      {expandedPhoto && (
+
+        <div
+          className="expanded-overlay"
+          onClick={closeExpanded}
+        >
+
+          <img
+            src={expandedPhoto.src}
+            alt="Memory"
+          />
+
+        </div>
+
+      )}
+
+
+
+      {/* =================================
+          FINAL MESSAGE
+      ================================= */}
+
       {showBirthdayMessage && (
+
         <div className="birthday-message">
+
           <div className="birthday-glow" />
 
           <div className="birthday-content">
+
             <span className="birthday-word happiest">
               Happiest
             </span>
@@ -749,36 +604,31 @@ useEffect(() => {
             <span className="birthday-word rionaaa">
               Rionaaa!
             </span>
+
           </div>
+
         </div>
+
       )}
 
 
 
-      {/* START SCREEN */}
+      {/* =================================
+          START SCREEN
+      ================================= */}
 
-      {!isStarted && (
+      {!started && (
 
         <div className="start-screen">
 
-          <div className="start-content">
+          <button
+            className="start-button"
+            onClick={startExperience}
+          >
 
-            <p>
-              SOMETHING SPECIAL
-            </p>
+            START
 
-
-            <button
-              onClick={startExperience}
-            >
-
-              <span>▶</span>
-
-              START
-
-            </button>
-
-          </div>
+          </button>
 
         </div>
 
@@ -786,14 +636,15 @@ useEffect(() => {
 
 
 
-      {/* RESTART BUTTON */}
+      {/* =================================
+          RESTART
+      ================================= */}
 
-      {isStarted && (
+      {started && !showBirthdayMessage && (
 
         <button
           className="restart-button"
           onClick={restartExperience}
-          aria-label="Restart"
         >
 
           ↻
@@ -801,7 +652,6 @@ useEffect(() => {
         </button>
 
       )}
-
 
     </main>
 

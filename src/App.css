@@ -1,43 +1,48 @@
-/* =========================================
-   ROOT
-========================================= */
+/* ========================================
+   APP
+======================================== */
 
 .app {
   position: relative;
+
   width: 100vw;
   height: 100vh;
 
   overflow: hidden;
+
   background: #000;
 
   perspective: 1500px;
 }
 
 
-/* =========================================
-   VIDEO - FULLSCREEN
-========================================= */
+/* ========================================
+   VIDEO
+======================================== */
 
 .birthday-video {
   position: absolute;
+
   inset: 0;
 
   width: 100%;
   height: 100%;
 
   object-fit: cover;
+
   object-position: center;
 
   z-index: 1;
 }
 
 
-/* =========================================
+/* ========================================
    GALLERY
-========================================= */
+======================================== */
 
 .gallery {
   position: absolute;
+
   inset: 0;
 
   width: 100%;
@@ -51,9 +56,9 @@
 }
 
 
-/* =========================================
+/* ========================================
    PHOTO CARD
-========================================= */
+======================================== */
 
 .photo-card {
   position: absolute;
@@ -65,26 +70,30 @@
   height: 360px;
 
   pointer-events: auto;
-  cursor: pointer;
 
-  transform: translate(-50%, -50%);
+  cursor: grab;
+
+  touch-action: none;
+
+  user-select: none;
 
   transform-origin: center;
-
-  transform-style: preserve-3d;
 
   will-change:
     transform,
     opacity,
     filter;
 
-  z-index: 10;
+  opacity: 0;
 }
 
 
-/* =========================================
-   IMAGE - CLEAN / BORDERLESS
-========================================= */
+.photo-card:active {
+  cursor: grabbing;
+}
+
+
+/* IMAGE */
 
 .photo-card img {
   width: 100%;
@@ -94,134 +103,142 @@
 
   object-fit: cover;
 
-  border-radius: 12px;
+  border-radius: 14px;
+
+  opacity: 0;
 
   user-select: none;
 
   -webkit-user-drag: none;
 
   box-shadow:
-    0 25px 70px rgba(0, 0, 0, 0.5);
+    0 25px 70px rgba(0, 0, 0, 0.55);
 
   transition:
+    opacity 0.35s ease,
     box-shadow 0.3s ease;
 }
 
 
-/* =========================================
-   HOVER
-========================================= */
+/* IMAGE LOADED */
 
-.photo-card:hover img {
-  box-shadow:
-    0 35px 90px rgba(0, 0, 0, 0.75);
+.photo-card.loaded img {
+  opacity: 1;
 }
 
 
-/* =========================================
-   ACTIVE PHOTO
-========================================= */
+/* ========================================
+   EXPANDED PHOTO
+======================================== */
 
-.photo-card.active {
+.expanded-overlay {
   position: fixed;
 
-  top: 50%;
-  left: 50%;
+  inset: 0;
 
-  width: min(80vw, 850px);
-  height: min(78vh, 750px);
+  z-index: 5000;
 
-  transform:
-    translate(-50%, -50%) !important;
+  display: flex;
 
-  z-index: 1000 !important;
+  align-items: center;
 
-  opacity: 1 !important;
+  justify-content: center;
 
-  filter: none !important;
+  background:
+    rgba(0, 0, 0, 0.85);
+
+  backdrop-filter:
+    blur(12px);
+
+  animation:
+    overlayFade 0.3s ease;
 }
 
 
-.photo-card.active img {
-  border-radius: 18px;
+.expanded-overlay img {
+  max-width: 88vw;
+
+  max-height: 85vh;
+
+  object-fit: contain;
+
+  border-radius: 14px;
 
   box-shadow:
-    0 50px 150px rgba(0, 0, 0, 0.85);
+    0 40px 120px rgba(0, 0, 0, 0.8);
+
+  animation:
+    imageExpand 0.4s cubic-bezier(0.16,
+      1,
+      0.3,
+      1);
 }
 
 
-/* =========================================
-   INACTIVE PHOTOS
-========================================= */
+@keyframes overlayFade {
 
-.photo-card.inactive {
-  opacity: 0.15 !important;
+  from {
+    opacity: 0;
+  }
 
-  filter: blur(6px);
+  to {
+    opacity: 1;
+  }
+
 }
 
 
-/* =========================================
+@keyframes imageExpand {
+
+  from {
+
+    transform: scale(0.8);
+
+    opacity: 0;
+
+  }
+
+  to {
+
+    transform: scale(1);
+
+    opacity: 1;
+
+  }
+
+}
+
+
+/* ========================================
    START SCREEN
-========================================= */
+======================================== */
 
 .start-screen {
   position: absolute;
+
   inset: 0;
 
   z-index: 100;
 
   display: flex;
-  justify-content: center;
+
   align-items: center;
+
+  justify-content: center;
 
   background:
-    rgba(0, 0, 0, 0.5);
+    rgba(0, 0, 0, 0.35);
 
   backdrop-filter:
-    blur(8px);
+    blur(5px);
 }
 
 
-.start-content {
-  display: flex;
-  flex-direction: column;
-
-  align-items: center;
-
-  gap: 20px;
-}
-
-
-.start-content p {
-  color:
-    rgba(255, 255, 255, 0.7);
-
-  font-family:
-    Arial,
-    sans-serif;
-
-  font-size: 10px;
-
-  letter-spacing: 5px;
-}
-
-
-/* =========================================
-   START BUTTON
-========================================= */
-
-.start-content button {
-  display: flex;
-  align-items: center;
-
-  gap: 10px;
-
+.start-button {
   padding:
-    18px 36px;
+    18px 40px;
 
-  border-radius:
-    100px;
+  border-radius: 100px;
 
   border:
     1px solid rgba(255, 255, 255, 0.35);
@@ -233,36 +250,38 @@
 
   font-size: 12px;
 
-  letter-spacing: 3px;
+  letter-spacing: 4px;
 
   cursor: pointer;
 
-  transition:
-    all 0.3s ease;
-
   backdrop-filter:
     blur(10px);
+
+  transition:
+    all 0.3s ease;
 }
 
 
-.start-content button:hover {
+.start-button:hover {
+
   transform:
     scale(1.08);
 
   background:
-    rgba(255, 255, 255, 0.18);
+    rgba(255, 255, 255, 0.2);
+
 }
 
 
-/* =========================================
-   RESTART
-========================================= */
+/* ========================================
+   RESTART BUTTON
+======================================== */
 
 .restart-button {
   position: absolute;
 
-  right: 20px;
   bottom: 20px;
+  right: 20px;
 
   z-index: 2000;
 
@@ -275,7 +294,7 @@
     1px solid rgba(255, 255, 255, 0.25);
 
   background:
-    rgba(0, 0, 0, 0.35);
+    rgba(0, 0, 0, 0.4);
 
   color: white;
 
@@ -283,7 +302,7 @@
 
   cursor: pointer;
 
-  opacity: 0.5;
+  opacity: 0.6;
 
   transition:
     all 0.3s ease;
@@ -291,87 +310,44 @@
 
 
 .restart-button:hover {
+
   opacity: 1;
 
   transform:
     rotate(180deg);
-}
-
-
-/* =========================================
-   MOBILE
-========================================= */
-
-@media (max-width: 768px) {
-
-  .photo-card {
-    width: 135px;
-    height: 180px;
-  }
-
-
-  .photo-card img {
-    border-radius: 10px;
-  }
-
-
-  .photo-card.active {
-    width: 88vw;
-    height: 72vh;
-  }
-
-
-  .restart-button {
-    width: 36px;
-    height: 36px;
-
-    right: 14px;
-    bottom: 14px;
-  }
 
 }
 
-/* =========================================
-   DRAGGABLE PHOTOS
-========================================= */
 
-.photo-card {
-  touch-action: none;
-}
-
-.photo-card:active {
-  cursor: grabbing;
-}
-
-.photo-card.dragging {
-  cursor: grabbing;
-}
-
-/* =========================================
+/* ========================================
    FINAL BIRTHDAY SCREEN
-========================================= */
+======================================== */
 
 .birthday-message {
+
   position: absolute;
+
   inset: 0;
 
-  z-index: 5000;
+  z-index: 10000;
 
   display: flex;
+
   align-items: center;
+
   justify-content: center;
 
   overflow: hidden;
 
   background: #080808;
 
-  animation: finalFadeIn 1.2s ease forwards;
+  animation:
+    finalFadeIn 1s ease forwards;
 }
 
 
-/* Soft cinematic glow */
-
 .birthday-glow {
+
   position: absolute;
 
   width: 80vw;
@@ -382,93 +358,116 @@
 
   border-radius: 50%;
 
-  background: radial-gradient(circle,
-      rgba(255, 92, 157, 0.22) 0%,
+  background:
+    radial-gradient(circle,
+      rgba(255, 92, 157, 0.22),
       rgba(255, 120, 180, 0.08) 35%,
       transparent 70%);
 
-  filter: blur(40px);
+  filter:
+    blur(40px);
 
-  animation: glowPulse 4s ease-in-out infinite;
+  animation:
+    glowPulse 4s ease-in-out infinite;
 }
 
 
-/* TEXT CONTAINER */
-
 .birthday-content {
+
   position: relative;
+
   z-index: 2;
 
   display: flex;
+
   flex-direction: column;
+
   align-items: center;
 
   text-align: center;
 }
 
 
-/* COMMON TEXT */
-
 .birthday-word {
-  display: block;
 
-  color: white;
+  display: block;
 
   line-height: 0.85;
 
   opacity: 0;
 
-  will-change: transform, opacity;
+  color: white;
 }
 
 
-/* HAPPIEST */
+/* Happiest */
 
 .happiest {
-  font-family: Georgia, serif;
 
-  font-size: clamp(48px, 7vw, 110px);
+  font-family:
+    Georgia,
+    serif;
+
+  font-size:
+    clamp(48px, 7vw, 110px);
 
   font-weight: 400;
 
   letter-spacing: -3px;
 
-  color: rgba(255, 255, 255, 0.85);
+  color:
+    rgba(255, 255, 255, 0.85);
 
-  animation: wordRevealLeft 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+  animation:
+    wordRevealLeft 1s cubic-bezier(0.16,
+      1,
+      0.3,
+      1) 0.3s forwards;
 }
 
 
-/* BIRTHDAY */
+/* Birthday */
 
 .birthday-final {
-  font-family: Georgia, serif;
 
-  font-size: clamp(65px, 11vw, 180px);
+  font-family:
+    Georgia,
+    serif;
 
-  font-weight: 400;
+  font-size:
+    clamp(65px, 11vw, 180px);
 
   font-style: italic;
+
+  font-weight: 400;
 
   letter-spacing: -6px;
 
   margin-top: 12px;
 
-  background: linear-gradient(120deg,
+  background:
+    linear-gradient(120deg,
       #ffffff,
       #ffb6d4,
       #ff5fa2);
 
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 
-  animation: wordRevealRight 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards;
+  -webkit-text-fill-color:
+    transparent;
+
+  animation:
+    wordRevealRight 1.2s cubic-bezier(0.16,
+      1,
+      0.3,
+      1) 0.7s forwards;
 }
 
 
-/* RIONAAA */
+/* Rionaaa */
 
 .rionaaa {
+
   margin-top: 35px;
 
   font-family:
@@ -476,26 +475,32 @@
     "Segoe Script",
     cursive;
 
-  font-size: clamp(60px, 9vw, 140px);
+  font-size:
+    clamp(60px, 9vw, 140px);
 
-  font-weight: 400;
+  color:
+    #ff75b5;
 
-  color: #ff75b5;
-
-  transform: rotate(-4deg);
+  transform:
+    rotate(-4deg);
 
   text-shadow:
     0 0 40px rgba(255, 80, 160, 0.35);
 
-  animation: nameReveal 1s cubic-bezier(0.16, 1, 0.3, 1) 1.4s forwards;
+  animation:
+    nameReveal 1s cubic-bezier(0.16,
+      1,
+      0.3,
+      1) 1.4s forwards;
 }
 
 
-/* =========================================
-   ANIMATIONS
-========================================= */
+/* ========================================
+   FINAL ANIMATIONS
+======================================== */
 
 @keyframes finalFadeIn {
+
   from {
     opacity: 0;
   }
@@ -503,101 +508,190 @@
   to {
     opacity: 1;
   }
+
 }
 
 
 @keyframes wordRevealLeft {
+
   from {
+
     opacity: 0;
-    transform: translateX(-100px);
-    filter: blur(15px);
+
+    transform:
+      translateX(-100px);
+
+    filter:
+      blur(15px);
+
   }
 
   to {
+
     opacity: 1;
-    transform: translateX(0);
-    filter: blur(0);
+
+    transform:
+      translateX(0);
+
+    filter:
+      blur(0);
+
   }
+
 }
 
 
 @keyframes wordRevealRight {
+
   from {
+
     opacity: 0;
-    transform: translateX(100px);
-    filter: blur(15px);
+
+    transform:
+      translateX(100px);
+
+    filter:
+      blur(15px);
+
   }
 
   to {
+
     opacity: 1;
-    transform: translateX(0);
-    filter: blur(0);
+
+    transform:
+      translateX(0);
+
+    filter:
+      blur(0);
+
   }
+
 }
 
 
 @keyframes nameReveal {
+
   from {
+
     opacity: 0;
+
     transform:
       translateY(50px) rotate(-4deg) scale(0.8);
 
-    filter: blur(10px);
+    filter:
+      blur(10px);
+
   }
 
   to {
+
     opacity: 1;
+
     transform:
       translateY(0) rotate(-4deg) scale(1);
 
-    filter: blur(0);
+    filter:
+      blur(0);
+
   }
+
 }
 
 
 @keyframes glowPulse {
+
   0% {
-    transform: scale(0.85);
+
+    transform:
+      scale(0.85);
+
     opacity: 0.5;
+
   }
 
   50% {
-    transform: scale(1.1);
+
+    transform:
+      scale(1.1);
+
     opacity: 1;
+
   }
 
   100% {
-    transform: scale(0.85);
+
+    transform:
+      scale(0.85);
+
     opacity: 0.5;
+
   }
+
 }
 
 
-/* =========================================
+/* ========================================
    MOBILE
-========================================= */
+======================================== */
 
 @media (max-width: 768px) {
 
-  .birthday-content {
-    width: 100%;
-    padding: 20px;
+  .photo-card {
+
+    width: 135px;
+    height: 180px;
+
   }
+
+
+  .photo-card img {
+
+    border-radius: 10px;
+
+  }
+
+
+  .expanded-overlay img {
+
+    max-width: 92vw;
+
+    max-height: 80vh;
+
+  }
+
+
+  .restart-button {
+
+    width: 36px;
+    height: 36px;
+
+    bottom: 14px;
+    right: 14px;
+
+  }
+
 
   .happiest {
+
     font-size: 52px;
-    letter-spacing: -2px;
+
   }
+
 
   .birthday-final {
+
     font-size: 76px;
+
     letter-spacing: -4px;
-    margin-top: 10px;
+
   }
 
+
   .rionaaa {
+
     font-size: 72px;
-    margin-top: 30px;
+
   }
 
 }
