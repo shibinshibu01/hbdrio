@@ -61,6 +61,8 @@ function App() {
   const [isStarted, setIsStarted] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
   const [activePhoto, setActivePhoto] = useState(null);
+  const [showBirthdayMessage, setShowBirthdayMessage] =
+  useState(false);
 
 
   /* =========================================
@@ -646,6 +648,17 @@ useEffect(() => {
         playsInline
         preload="auto"
         onTimeUpdate={handleTimeUpdate}
+        onEnded={() => {
+
+          setShowGallery(false);
+
+          setTimeout(() => {
+
+            setShowBirthdayMessage(true);
+
+          }, 500);
+
+        }}
       >
 
         <source
@@ -718,6 +731,26 @@ useEffect(() => {
 
         </div>
 
+      )}
+
+      {showBirthdayMessage && (
+        <div className="birthday-message">
+          <div className="birthday-glow" />
+
+          <div className="birthday-content">
+            <span className="birthday-word happiest">
+              Happiest
+            </span>
+
+            <span className="birthday-word birthday-final">
+              Birthday
+            </span>
+
+            <span className="birthday-word rionaaa">
+              Rionaaa!
+            </span>
+          </div>
+        </div>
       )}
 
 

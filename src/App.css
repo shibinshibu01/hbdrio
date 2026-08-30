@@ -346,3 +346,258 @@
 .photo-card.dragging {
   cursor: grabbing;
 }
+
+/* =========================================
+   FINAL BIRTHDAY SCREEN
+========================================= */
+
+.birthday-message {
+  position: absolute;
+  inset: 0;
+
+  z-index: 5000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background: #080808;
+
+  animation: finalFadeIn 1.2s ease forwards;
+}
+
+
+/* Soft cinematic glow */
+
+.birthday-glow {
+  position: absolute;
+
+  width: 80vw;
+  height: 80vw;
+
+  max-width: 900px;
+  max-height: 900px;
+
+  border-radius: 50%;
+
+  background: radial-gradient(circle,
+      rgba(255, 92, 157, 0.22) 0%,
+      rgba(255, 120, 180, 0.08) 35%,
+      transparent 70%);
+
+  filter: blur(40px);
+
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+
+/* TEXT CONTAINER */
+
+.birthday-content {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+}
+
+
+/* COMMON TEXT */
+
+.birthday-word {
+  display: block;
+
+  color: white;
+
+  line-height: 0.85;
+
+  opacity: 0;
+
+  will-change: transform, opacity;
+}
+
+
+/* HAPPIEST */
+
+.happiest {
+  font-family: Georgia, serif;
+
+  font-size: clamp(48px, 7vw, 110px);
+
+  font-weight: 400;
+
+  letter-spacing: -3px;
+
+  color: rgba(255, 255, 255, 0.85);
+
+  animation: wordRevealLeft 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+}
+
+
+/* BIRTHDAY */
+
+.birthday-final {
+  font-family: Georgia, serif;
+
+  font-size: clamp(65px, 11vw, 180px);
+
+  font-weight: 400;
+
+  font-style: italic;
+
+  letter-spacing: -6px;
+
+  margin-top: 12px;
+
+  background: linear-gradient(120deg,
+      #ffffff,
+      #ffb6d4,
+      #ff5fa2);
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  animation: wordRevealRight 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards;
+}
+
+
+/* RIONAAA */
+
+.rionaaa {
+  margin-top: 35px;
+
+  font-family:
+    "Brush Script MT",
+    "Segoe Script",
+    cursive;
+
+  font-size: clamp(60px, 9vw, 140px);
+
+  font-weight: 400;
+
+  color: #ff75b5;
+
+  transform: rotate(-4deg);
+
+  text-shadow:
+    0 0 40px rgba(255, 80, 160, 0.35);
+
+  animation: nameReveal 1s cubic-bezier(0.16, 1, 0.3, 1) 1.4s forwards;
+}
+
+
+/* =========================================
+   ANIMATIONS
+========================================= */
+
+@keyframes finalFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+
+@keyframes wordRevealLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+    filter: blur(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+}
+
+
+@keyframes wordRevealRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+    filter: blur(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+}
+
+
+@keyframes nameReveal {
+  from {
+    opacity: 0;
+    transform:
+      translateY(50px) rotate(-4deg) scale(0.8);
+
+    filter: blur(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0) rotate(-4deg) scale(1);
+
+    filter: blur(0);
+  }
+}
+
+
+@keyframes glowPulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.85);
+    opacity: 0.5;
+  }
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 768px) {
+
+  .birthday-content {
+    width: 100%;
+    padding: 20px;
+  }
+
+  .happiest {
+    font-size: 52px;
+    letter-spacing: -2px;
+  }
+
+  .birthday-final {
+    font-size: 76px;
+    letter-spacing: -4px;
+    margin-top: 10px;
+  }
+
+  .rionaaa {
+    font-size: 72px;
+    margin-top: 30px;
+  }
+
+}
