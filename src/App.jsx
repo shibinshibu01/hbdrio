@@ -80,60 +80,70 @@ const shuffleArray = (array) => {
 
 const positions = [
 
-  {
-    x: -0.9,
-    y: -1,
-    rotation: -10,
-    scale: 0.9,
-  },
-
-  {
-    x: 0,
-    y: -1.2,
-    rotation: 2,
-    scale: 1,
-  },
-
-  {
-    x: 0.9,
-    y: -1,
-    rotation: 9,
-    scale: 0.9,
-  },
-
+  /* TOP LEFT */
   {
     x: -1.15,
-    y: 0,
-    rotation: -7,
-    scale: 1,
+    y: -0.95,
+    rotation: -14,
+    scale: 0.88,
   },
 
+  /* TOP CENTER */
   {
-    x: 1.15,
-    y: 0,
-    rotation: 7,
-    scale: 1,
+    x: -0.15,
+    y: -1.28,
+    rotation: 4,
+    scale: 0.95,
   },
 
+  /* TOP RIGHT */
   {
-    x: -0.9,
-    y: 1,
-    rotation: 8,
-    scale: 0.9,
+    x: 1.08,
+    y: -0.9,
+    rotation: 13,
+    scale: 0.86,
   },
 
-  {
-    x: 0,
-    y: 1.2,
-    rotation: -2,
-    scale: 1,
-  },
 
+  /* MIDDLE LEFT */
   {
-    x: 0.9,
-    y: 1,
+    x: -1.28,
+    y: -0.12,
     rotation: -8,
+    scale: 1,
+  },
+
+  /* CENTER RIGHT */
+  {
+    x: 1.22,
+    y: 0.08,
+    rotation: 9,
+    scale: 0.96,
+  },
+
+
+  /* BOTTOM LEFT */
+  {
+    x: -1.05,
+    y: 1.02,
+    rotation: 11,
     scale: 0.9,
+  },
+
+  /* BOTTOM CENTER */
+  {
+    x: 0.18,
+    y: 1.3,
+    rotation: -5,
+    scale: 1,
+  },
+
+  /* BOTTOM RIGHT */
+  {
+    x: 1.18,
+    y: 0.92,
+    rotation: -12,
+    scale: 0.88,
   },
 
 ];
