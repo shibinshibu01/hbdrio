@@ -68,6 +68,8 @@ function PhotoCard({
       scale: 0.7,
       x: startX,
       y: startY,
+      xPercent: -50,
+      yPercent: -50,
       rotation: position.rotation,
       filter: "blur(12px)",
     });
@@ -82,6 +84,8 @@ function PhotoCard({
       scale: position.scale,
       x: targetX,
       y: targetY,
+      xPercent: -50,
+      yPercent: -50,
       rotation: position.rotation,
       filter: "blur(0px)",
       duration: 0.9,

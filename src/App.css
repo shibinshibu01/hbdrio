@@ -11,6 +11,7 @@
   overflow: hidden;
 
   background: #967bb6;
+  /* zoom: .8; */
 
   perspective: 1500px;
 }
@@ -259,6 +260,7 @@
 
   transition:
     all 0.3s ease;
+    margin-top: -125px;
 }
 
 
@@ -601,82 +603,12 @@
 
 
 /* ========================================
-   Happiest
-======================================== */
-
-.happiest {
-  font-family:
-    Georgia,
-    serif;
-
-  font-size:
-    clamp(48px, 7vw, 110px);
-
-  font-weight: 400;
-
-  letter-spacing: -3px;
-
-  color:
-    rgba(255, 248, 240, 0.9);
-
-  text-shadow:
-    0 5px 30px rgba(70, 45, 90, 0.18);
-
-  animation:
-    wordRevealLeft 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
-}
-
-
-/* ========================================
-   Birthday
-======================================== */
-
-.birthday-final {
-  font-family:
-    Georgia,
-    serif;
-
-  font-size:
-    clamp(65px, 11vw, 180px);
-
-  font-style: italic;
-
-  font-weight: 400;
-
-  letter-spacing: -6px;
-
-  margin-top: 12px;
-
-  /*
-    Soft cream → lavender gradient
-  */
-
-  background:
-    linear-gradient(135deg,
-      #fffaf5 0%,
-      #f3e7ff 45%,
-      #d8bfe8 100%);
-
-  -webkit-background-clip: text;
-  background-clip: text;
-
-  -webkit-text-fill-color:
-    transparent;
-
-  filter:
-    drop-shadow(0 8px 18px rgba(67, 43, 90, 0.18));
-
-  animation:
-    wordRevealRight 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards;
-}
-
-
-/* ========================================
    Rionaaa!
 ======================================== */
 
 .rionaaa {
-  margin-top: 35px;
+  margin-top: -125px;
+  line-height: 1.2;
 
   font-family:
     "Brush Script MT",
@@ -691,7 +623,7 @@
   */
 
   color:
-    #f4d7e8;
+    #2a094f;
 
   transform:
     rotate(-4deg);

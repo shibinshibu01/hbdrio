@@ -592,17 +592,9 @@ function App() {
           <div className="birthday-glow" />
 
           <div className="birthday-content">
-
-            <span className="birthday-word happiest">
-              Happiest
-            </span>
-
-            <span className="birthday-word birthday-final">
-              Birthday
-            </span>
-
+            
             <span className="birthday-word rionaaa">
-              Rionaaa!
+              Happy Birthday Rionaaa!
             </span>
 
           </div>
