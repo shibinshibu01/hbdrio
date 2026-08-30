@@ -42,6 +42,39 @@ const photos = Object.entries(photoModules)
 
 
 /* ========================================
+   SHUFFLE PHOTOS
+======================================== */
+
+const shuffleArray = (array) => {
+
+  const shuffled = [...array];
+
+  for (
+    let i = shuffled.length - 1;
+    i > 0;
+    i--
+  ) {
+
+    const j = Math.floor(
+      Math.random() * (i + 1)
+    );
+
+    [
+      shuffled[i],
+      shuffled[j],
+    ] = [
+      shuffled[j],
+      shuffled[i],
+    ];
+
+  }
+
+  return shuffled;
+
+};
+
+
+/* ========================================
    CENTER POSITIONS
 ======================================== */
 
@@ -109,6 +142,10 @@ const positions = [
 const MAX_VISIBLE = 8;
 
 
+/* ========================================
+   APP
+======================================== */
+
 function App() {
 
   const videoRef = useRef(null);
@@ -116,6 +153,8 @@ function App() {
   const animationStarted = useRef(false);
 
   const nextPhotoIndex = useRef(0);
+
+  const shuffledPhotos = useRef([]);
 
 
   const [started, setStarted] =
@@ -136,8 +175,6 @@ function App() {
 
   /* ========================================
      PRELOAD IMAGES
-
-     First 12 load while video plays.
   ======================================== */
 
   useEffect(() => {
@@ -157,7 +194,6 @@ function App() {
   }, []);
 
 
-
   /* ========================================
      PRELOAD UPCOMING PHOTOS
   ======================================== */
@@ -168,19 +204,19 @@ function App() {
 
     const preloadAmount = 4;
 
-
     for (
       let i = startIndex;
       i < Math.min(
         startIndex + preloadAmount,
-        photos.length
+        shuffledPhotos.current.length
       );
       i++
     ) {
 
       const image = new Image();
 
-      image.src = photos[i];
+      image.src =
+        shuffledPhotos.current[i];
 
     }
 
@@ -197,13 +233,20 @@ function App() {
 
     animationStarted.current = true;
 
+
+    /* Shuffle photos every time */
+
+    shuffledPhotos.current =
+      shuffleArray(photos);
+
+
     setShowGallery(true);
 
 
     /* Initial 8 photos */
 
     const initialPhotos =
-      photos
+      shuffledPhotos.current
         .slice(0, MAX_VISIBLE)
         .map((src, index) => ({
 
@@ -256,7 +299,7 @@ function App() {
   /* ========================================
      ROTATE PHOTOS
 
-     Replace oldest photo.
+     Replace 2 or 3 photos randomly.
   ======================================== */
 
   useEffect(() => {
@@ -267,53 +310,66 @@ function App() {
     const interval =
       setInterval(() => {
 
-        if (
-          nextPhotoIndex.current >=
-          photos.length
-        ) {
+        setVisiblePhotos(current => {
 
-          clearInterval(interval);
-
-          return;
-
-        }
+          if (!current.length) {
+            return current;
+          }
 
 
-        /* Mark oldest for removal */
+          if (
+            nextPhotoIndex.current >=
+            shuffledPhotos.current.length
+          ) {
 
-        setVisiblePhotos(
-          current => {
-
-            if (!current.length) {
-              return current;
-            }
-
-
-            const updated =
-              current.map(
-                (photo, index) => {
-
-                  if (index === 0) {
-
-                    return {
-                      ...photo,
-                      removing: true,
-                    };
-
-                  }
-
-                  return photo;
-
-                }
-              );
-
-
-            return updated;
+            return current;
 
           }
-        );
 
-      }, 1100);
+
+          /* Randomly remove 2 or 3 photos */
+
+          const removeCount =
+            Math.random() > 0.5
+              ? 2
+              : 3;
+
+
+          /* Don't remove more than available */
+
+          const actualRemoveCount =
+            Math.min(
+              removeCount,
+              current.length,
+              shuffledPhotos.current.length -
+                nextPhotoIndex.current
+            );
+
+
+          /* Mark oldest photos for removal */
+
+          return current.map(
+            (photo, index) => {
+
+              if (
+                index < actualRemoveCount
+              ) {
+
+                return {
+                  ...photo,
+                  removing: true,
+                };
+
+              }
+
+              return photo;
+
+            }
+          );
+
+        });
+
+      }, 1800);
 
 
     return () => {
@@ -336,6 +392,12 @@ function App() {
     setVisiblePhotos(
       current => {
 
+        const removedPhoto =
+          current.find(
+            photo => photo.id === id
+          );
+
+
         const filtered =
           current.filter(
             photo =>
@@ -345,7 +407,7 @@ function App() {
 
         if (
           nextPhotoIndex.current >=
-          photos.length
+          shuffledPhotos.current.length
         ) {
 
           return filtered;
@@ -361,11 +423,15 @@ function App() {
 
           id: newIndex,
 
-          src: photos[newIndex],
+          src:
+            shuffledPhotos.current[
+              newIndex
+            ],
+
+          /* Take exact slot of removed photo */
 
           slot:
-            newIndex %
-            MAX_VISIBLE,
+            removedPhoto?.slot ?? 0,
 
         };
 
@@ -399,6 +465,7 @@ function App() {
     async () => {
 
       if (!videoRef.current) return;
+
 
       try {
 
@@ -481,6 +548,8 @@ function App() {
 
       nextPhotoIndex.current = 0;
 
+      shuffledPhotos.current = [];
+
 
       setShowGallery(false);
 
@@ -525,7 +594,6 @@ function App() {
       </video>
 
 
-
       {/* =================================
           PHOTO GALLERY
       ================================= */}
@@ -535,7 +603,7 @@ function App() {
         <div className="gallery">
 
           {visiblePhotos.map(
-            (photo, index) => (
+            (photo) => (
 
               <PhotoCard
                 key={photo.id}
@@ -558,7 +626,6 @@ function App() {
       )}
 
 
-
       {/* =================================
           EXPANDED PHOTO
       ================================= */}
@@ -578,7 +645,6 @@ function App() {
         </div>
 
       )}
-
 
 
       {/* =================================
@@ -604,7 +670,6 @@ function App() {
       )}
 
 
-
       {/* =================================
           START SCREEN
       ================================= */}
@@ -625,7 +690,6 @@ function App() {
         </div>
 
       )}
-
 
 
       {/* =================================
