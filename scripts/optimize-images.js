@@ -6,20 +6,22 @@ const inputFolder = "./src/assets/photos";
 const outputFolder = "./src/assets/photos-optimized";
 
 if (!fs.existsSync(outputFolder)) {
-    fs.mkdirSync(outputFolder, { recursive: true });
+    fs.mkdirSync(outputFolder, {
+        recursive: true,
+    });
 }
 
 const files = fs.readdirSync(inputFolder);
 
 async function optimizeImages() {
-    for (const file of files) {
-        const inputPath = path.join(inputFolder, file);
+    console.log("\nOptimizing images...\n");
 
-        if (
-            !file.match(/\.(jpg|jpeg|png)$/i)
-        ) {
+    for (const file of files) {
+        if (!file.match(/\.(jpg|jpeg|png)$/i)) {
             continue;
         }
+
+        const inputPath = path.join(inputFolder, file);
 
         const fileName = path.parse(file).name;
 
@@ -32,24 +34,21 @@ async function optimizeImages() {
             await sharp(inputPath)
                 .rotate()
                 .resize({
-                    width: 1200,
+                    width: 700,
                     withoutEnlargement: true,
                 })
                 .webp({
-                    quality: 78,
+                    quality: 75,
                 })
                 .toFile(outputPath);
 
             console.log(`✓ Optimized: ${file}`);
         } catch (error) {
-            console.error(
-                `✗ Failed: ${file}`,
-                error
-            );
+            console.error(`✗ Failed: ${file}`, error);
         }
     }
 
-    console.log("\n🎉 Done!");
+    console.log("\n🎉 All images optimized!\n");
 }
 
 optimizeImages();
