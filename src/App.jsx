@@ -592,7 +592,7 @@ function App() {
           <div className="birthday-glow" />
 
           <div className="birthday-content">
-            
+
             <span className="birthday-word rionaaa">
               Happy Birthday Rionaaa!
             </span>
@@ -618,7 +618,7 @@ function App() {
             onClick={startExperience}
           >
 
-            START
+            Whoosh!
 
           </button>
 
